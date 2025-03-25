@@ -21,13 +21,21 @@ def createLineEdit():
     return CustomLineEdit()
 
 def load_json(path):
-    if not os.path.exists(path):
-        return {}
+    """加載JSON文件，支持絕對和相對路徑"""
     try:
+        # 如果是相對路徑，轉換為絕對路徑
+        if not os.path.isabs(path):
+            base_dir = os.path.dirname(os.path.dirname(__file__))
+            path = os.path.join(base_dir, path)
+            
+        if not os.path.exists(path):
+            print(f"⚠️ 文件不存在: {path}")
+            return {}
+            
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
-        print(f"❌ 無法讀取 JSON: {e}")
+        print(f"❌ 無法讀取 JSON: {str(e)}")
         return {}
 
 def save_json(data, path):
