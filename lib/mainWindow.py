@@ -3,13 +3,14 @@ import os
 from PySide6.QtWidgets import (QMainWindow, QLineEdit, QWidget, QHBoxLayout,
     QPushButton, QMessageBox, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel, QCalendarWidget)
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QAction
 from lib.main_ui import Ui_MainWindow
 from lib.fixedRentEditor import FixedRentEditor
 from lib.func import load_json, AddNewRow, exportToJsonDict, loadCurrentDateRows, onDateChanged
 from lib.moneyCalculate import RentSummaryInputDialog, RentSummaryPreview
 from lib.bindingCode import NameBindingDialog
 from lib.dateViewer import DateViewer
+from lib.personSummary import PersonSummaryDialog
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -18,6 +19,9 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.calendar = self.ui.calendarWidget
         self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
+        
+        # 初始化選單
+        self.init_menu()
         
         self.rowContainer = self.ui.scrollAreaWidgetContents_2
         self.scrollAreaLayout = self.ui.verticalLayout_4
@@ -61,6 +65,20 @@ class MainWindow(QMainWindow):
         self.dateViewer = DateViewer(self.data_path)
         self.dateViewer.show()
 
+    def openPersonSummary(self):
+        exportToJsonDict(self, self.current_date)
+        self.personSummary = PersonSummaryDialog(self.data_path)
+        self.personSummary.show()
+
+    def init_menu(self):
+        """初始化選單功能"""
+        report_menu = self.menuBar().addMenu("報表")
+        
+        # 個人收支總結
+        person_summary_action = QAction("個人收支總結", self)
+        person_summary_action.triggered.connect(self.openPersonSummary)
+        report_menu.addAction(person_summary_action)
+        
     def closeEvent(self, event):
         exportToJsonDict(self, self.current_date)
         msg = QMessageBox(self)
