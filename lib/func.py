@@ -2,12 +2,23 @@
 
 import json
 import os
-import json
-import os
-from PySide6.QtWidgets import (QMainWindow, QLineEdit, QWidget, QHBoxLayout,
-    QPushButton, QMessageBox, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel)
+from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout,
+    QPushButton, QMessageBox, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel, QLineEdit)
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
+
+class CustomLineEdit(QLineEdit):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.clearFocus()
+        else:
+            super().keyPressEvent(event)
+
+def createLineEdit():
+    return CustomLineEdit()
 
 def load_json(path):
     if not os.path.exists(path):
@@ -31,13 +42,15 @@ def AddNewRow(self):
     row_layout = QHBoxLayout(row)
 
     for i in range(5):
-        line = QLineEdit(row)
+        line = createLineEdit()
         line.setObjectName(f"lineEdit_{i}")
         row_layout.addWidget(line)
+        if i == 0:
+            line.setFocus()
 
     btn_row = QWidget(self.rowContainer)
     btn_layout = QHBoxLayout(btn_row)
-    button = QPushButton("X", btn_row)
+    button = QPushButton("", btn_row)
     button.setIcon(QIcon(":/images/x.png"))
     button.setIconSize(QSize(24, 24))
     button.setObjectName("button")

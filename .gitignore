@@ -1,1 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
 venv/
+
+# Build
+build/
+dist/
+
+# Temporary files
+*.tmp
+*.bak
+tmp.zip
+
+# IDE
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

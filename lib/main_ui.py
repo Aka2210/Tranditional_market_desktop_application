@@ -26,7 +26,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(800, 1000)
+        MainWindow.resize(600, 800)
         self.binding = QAction(MainWindow)
         self.binding.setObjectName(u"binding")
         self.bindingCode = QAction(MainWindow)

@@ -1,7 +1,7 @@
 import json
 import os
 from PySide6.QtWidgets import (QMainWindow, QLineEdit, QWidget, QHBoxLayout,
-    QPushButton, QMessageBox, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel)
+    QPushButton, QMessageBox, QVBoxLayout, QScrollArea, QSpacerItem, QSizePolicy, QLabel, QCalendarWidget)
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
 from lib.main_ui import Ui_MainWindow
@@ -9,6 +9,7 @@ from lib.fixedRentEditor import FixedRentEditor
 from lib.func import load_json, AddNewRow, exportToJsonDict, loadCurrentDateRows, onDateChanged
 from lib.moneyCalculate import RentSummaryInputDialog, RentSummaryPreview
 from lib.bindingCode import NameBindingDialog
+from lib.dateViewer import DateViewer
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -16,11 +17,13 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.calendar = self.ui.calendarWidget
+        self.calendar.setVerticalHeaderFormat(QCalendarWidget.NoVerticalHeader)
         
         self.rowContainer = self.ui.scrollAreaWidgetContents_2
         self.scrollAreaLayout = self.ui.verticalLayout_4
         self.rowsManager = []
         self.ui.addColumn.clicked.connect(lambda _: AddNewRow(self))
+        self.ui.addColumn.setShortcut(Qt.Key_Space)
         self.ui.fixedRent.triggered.connect(self.openFixedRentEditor)
         self.current_date = self.calendar.selectedDate().toString("yyyy-MM-dd")
         self.calendar.clicked.connect(lambda date: onDateChanged(self, date))
@@ -29,6 +32,11 @@ class MainWindow(QMainWindow):
         loadCurrentDateRows(self)
         self.ui.moneyCalculate.triggered.connect(self.openRentSummary)
         self.ui.bindingCode.triggered.connect(self.openNameBinding)
+        
+        # Add date viewer button
+        self.date_viewer_btn = QPushButton("檢視日期資料", self)
+        self.date_viewer_btn.clicked.connect(self.openDateViewer)
+        self.menuBar().setCornerWidget(self.date_viewer_btn, Qt.TopLeftCorner)
 
     def openRentSummary(self):
         exportToJsonDict(self, self.current_date)
@@ -48,6 +56,11 @@ class MainWindow(QMainWindow):
         self.nameBindingWindow = NameBindingDialog()
         self.nameBindingWindow.show()
 
+    def openDateViewer(self):
+        exportToJsonDict(self, self.current_date)
+        self.dateViewer = DateViewer(self.data_path)
+        self.dateViewer.show()
+
     def closeEvent(self, event):
         exportToJsonDict(self, self.current_date)
         msg = QMessageBox(self)
@@ -60,4 +73,3 @@ class MainWindow(QMainWindow):
             event.accept()
         elif msg.clickedButton() == no_btn:
             event.ignore()
-            
