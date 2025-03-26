@@ -27,9 +27,11 @@ class RentSummaryInputDialog(QDialog):
                     data = json.load(f)
                     for entries in data.values():
                         for entry in entries:
-                            if len(entry) >= 4:
-                                names_set.add(entry[2])
-                                names_set.add(entry[3])
+                            if isinstance(entry, list) and len(entry) >= 4:
+                                if entry[2]:  # 使用人
+                                    names_set.add(entry[2])
+                                if len(entry) > 3 and entry[3]:  # 所有人
+                                    names_set.add(entry[3])
 
         # 加入代號綁定名稱
         bindings_path = "resources/jsonData/name_bindings.json"
@@ -170,40 +172,41 @@ class RentSummaryPreview(QDialog):
                 qdate = QDate.fromString(date, "yyyy-MM-dd")
                 weekday_zh = "日一二三四五六"[qdate.dayOfWeek() % 7] if qdate.isValid() else ""
                 for entry in entry_list:
+                    if not isinstance(entry, list) or len(entry) < 4:
+                        continue
                     flat_data = []
-                    if len(entry) >= 4:
-                        market, rent, entry_owner, entry_user = entry[0], entry[1], entry[2], entry[3]
-                        if market == "" or rent == "" or entry_owner == "" or entry_user == "":
-                            continue
-                        if (
-                            (entry_owner == owner and entry_user == user)
-                            or (entry_owner == user and entry_user == owner)
-                            or (match_name(entry_owner, owner) and match_name(entry_user, user))
-                            or (match_name(entry_owner, user) and match_name(entry_user, owner))
-                        ):
-                            resolved_market = resolve_market(market)
-                            flat_data.extend([date.replace("-", "/"), weekday_zh, resolved_market, rent])
-                            rent_value = int(rent.replace(",", ""))
-                            if match_name(entry_owner, owner) and match_name(entry_user, user):
-                                owner_total += rent_value
-                                user_total -= rent_value
-                                if self.table.rowCount() <= user_row:
-                                    self.table.insertRow(self.table.rowCount())
-                                for i in range(4):
-                                    item = QTableWidgetItem(flat_data[i])
-                                    item.setTextAlignment(Qt.AlignCenter)
-                                    self.table.setItem(user_row, i, item)
-                                user_row += 1
-                            elif match_name(entry_owner, user) and match_name(entry_user, owner):
-                                user_total += rent_value
-                                owner_total -= rent_value
-                                if self.table.rowCount() <= owner_row:
-                                    self.table.insertRow(self.table.rowCount())
-                                for i in range(4, 8):
-                                    item = QTableWidgetItem(flat_data[i - 4])
-                                    item.setTextAlignment(Qt.AlignCenter)
-                                    self.table.setItem(owner_row, i, item)
-                                owner_row += 1
+                    market, rent, entry_owner, entry_user = entry[0], entry[1], entry[2], entry[3]
+                    if market == "" or rent == "" or entry_owner == "" or entry_user == "":
+                        continue
+                    if (
+                        (entry_owner == owner and entry_user == user)
+                        or (entry_owner == user and entry_user == owner)
+                        or (match_name(entry_owner, owner) and match_name(entry_user, user))
+                        or (match_name(entry_owner, user) and match_name(entry_user, owner))
+                    ):
+                        resolved_market = resolve_market(market)
+                        flat_data.extend([date.replace("-", "/"), weekday_zh, resolved_market, rent])
+                        rent_value = int(rent.replace(",", ""))
+                        if match_name(entry_owner, owner) and match_name(entry_user, user):
+                            owner_total += rent_value
+                            user_total -= rent_value
+                            if self.table.rowCount() <= user_row:
+                                self.table.insertRow(self.table.rowCount())
+                            for i in range(4):
+                                item = QTableWidgetItem(flat_data[i])
+                                item.setTextAlignment(Qt.AlignCenter)
+                                self.table.setItem(user_row, i, item)
+                            user_row += 1
+                        elif match_name(entry_owner, user) and match_name(entry_user, owner):
+                            user_total += rent_value
+                            owner_total -= rent_value
+                            if self.table.rowCount() <= owner_row:
+                                self.table.insertRow(self.table.rowCount())
+                            for i in range(4, 8):
+                                item = QTableWidgetItem(flat_data[i - 4])
+                                item.setTextAlignment(Qt.AlignCenter)
+                                self.table.setItem(owner_row, i, item)
+                            owner_row += 1
 
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
@@ -304,4 +307,3 @@ class RentSummaryPreview(QDialog):
 
         self.print_btn.show()
         self.close_btn.show()
-

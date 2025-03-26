@@ -31,8 +31,11 @@ class MainWindow(QMainWindow):
         self.ui.fixedRent.triggered.connect(self.openFixedRentEditor)
         self.current_date = self.calendar.selectedDate().toString("yyyy-MM-dd")
         self.calendar.clicked.connect(lambda date: onDateChanged(self, date))
+        
+        # 載入資料
         self.data_path = "resources/jsonData/mainData.json"
         self.data_dict = load_json(self.data_path)
+        
         loadCurrentDateRows(self)
         self.ui.moneyCalculate.triggered.connect(self.openRentSummary)
         self.ui.bindingCode.triggered.connect(self.openNameBinding)
@@ -67,7 +70,7 @@ class MainWindow(QMainWindow):
 
     def openPersonSummary(self):
         exportToJsonDict(self, self.current_date)
-        self.personSummary = PersonSummaryDialog(self.data_path)
+        self.personSummary = PersonSummaryDialog()
         self.personSummary.show()
 
     def init_menu(self):

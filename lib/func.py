@@ -1,5 +1,3 @@
-# lib/func.py
-
 import json
 import os
 from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout,
