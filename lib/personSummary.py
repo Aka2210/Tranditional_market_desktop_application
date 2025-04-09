@@ -121,8 +121,8 @@ class PersonSummaryDialog(QDialog):
                 for month, month_data in data.items():
                     for entry in month_data:
                         if len(entry) > 2:
-                            user = self.resolve_name(entry[2])
-                            owner = self.resolve_name(entry[3]) if len(entry) > 3 else None
+                            owner = self.resolve_name(entry[2])
+                            user = self.resolve_name(entry[3]) if len(entry) > 3 else None
                             
                             # 處理收入（使用人）
                             if user == selected_person:

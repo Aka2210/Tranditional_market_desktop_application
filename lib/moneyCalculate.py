@@ -23,15 +23,20 @@ class RentSummaryInputDialog(QDialog):
         names_set = set()
         for path in ["resources/jsonData/mainData.json", "resources/jsonData/fixedRentData.json"]:
             if os.path.exists(path):
-                with open(path, encoding="utf-8") as f:
-                    data = json.load(f)
-                    for entries in data.values():
-                        for entry in entries:
-                            if isinstance(entry, list) and len(entry) >= 4:
-                                if entry[2]:  # 使用人
-                                    names_set.add(entry[2])
-                                if len(entry) > 3 and entry[3]:  # 所有人
-                                    names_set.add(entry[3])
+                try:
+                    with open(path, encoding="utf-8") as f:
+                        data = json.load(f)
+                        for entries in data.values():
+                            for entry in entries:
+                                if isinstance(entry, list) and len(entry) >= 4:
+                                    if entry[2]:  # 使用人
+                                        names_set.add(entry[2])
+                                    if entry[3]:  # 所有人
+                                        names_set.add(entry[3])
+                except (json.JSONDecodeError, IOError) as e:
+                    print(f"Error reading {path}: {e}")
+            else:
+                print(f"File not found: {path}")
 
         # 加入代號綁定名稱
         bindings_path = "resources/jsonData/name_bindings.json"
@@ -164,7 +169,14 @@ class RentSummaryPreview(QDialog):
         self.table.setRowCount(0)
         self.table.setStyleSheet("QTableWidget { font-size: 18px; padding: 12px; }")
 
-        for date, entry_list in combined_data.items():
+        # 按日期排序處理資料
+        sorted_dates = sorted(
+            combined_data.keys(),
+            key=lambda x: datetime.strptime(x, "%Y-%m-%d").toordinal()
+        )
+        
+        for date in sorted_dates:
+            entry_list = combined_data[date]
             if not entry_list or not isinstance(entry_list, list):
                 continue
             entry_year, entry_month = date.split("-")[0], date.split("-")[1]
