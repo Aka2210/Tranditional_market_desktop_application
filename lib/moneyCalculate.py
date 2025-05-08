@@ -53,7 +53,7 @@ class RentSummaryInputDialog(QDialog):
         self.owner_input.setEditable(True)
         self.owner_input.addItems(sorted_names)
         self.owner_input.setInsertPolicy(QComboBox.InsertAtTop)
-        layout.addWidget(QLabel("所有人："))
+        layout.addWidget(QLabel("公司所有人："))
         layout.addWidget(self.owner_input)
 
         # 使用人
@@ -191,15 +191,15 @@ class RentSummaryPreview(QDialog):
                     if market == "" or rent == "" or entry_owner == "" or entry_user == "":
                         continue
                     if (
-                        (entry_owner == owner and entry_user == user)
-                        or (entry_owner == user and entry_user == owner)
-                        or (match_name(entry_owner, owner) and match_name(entry_user, user))
-                        or (match_name(entry_owner, user) and match_name(entry_user, owner))
+                        (entry_user == user)
+                        or (entry_owner == user)
+                        or (match_name(entry_user, user))
+                        or (match_name(entry_owner, user))
                     ):
                         resolved_market = resolve_market(market)
                         flat_data.extend([date.replace("-", "/"), weekday_zh, resolved_market, rent])
                         rent_value = int(rent.replace(",", ""))
-                        if match_name(entry_owner, owner) and match_name(entry_user, user):
+                        if match_name(entry_user, user):
                             owner_total += rent_value
                             user_total -= rent_value
                             if self.table.rowCount() <= user_row:
@@ -209,7 +209,7 @@ class RentSummaryPreview(QDialog):
                                 item.setTextAlignment(Qt.AlignCenter)
                                 self.table.setItem(user_row, i, item)
                             user_row += 1
-                        elif match_name(entry_owner, user) and match_name(entry_user, owner):
+                        elif match_name(entry_owner, user):
                             user_total += rent_value
                             owner_total -= rent_value
                             if self.table.rowCount() <= owner_row:
@@ -230,7 +230,7 @@ class RentSummaryPreview(QDialog):
         if user_total >= 0:
             self.diff_label.setText(f"{user}需收到：{user_total} 元\n{owner}需支付：{user_total} 元")
         elif owner_total >= 0:
-            self.diff_label.setText(f"{owner}需收到：{owner_total} 元\n{user}需支付：{owner_total} 元")
+            self.diff_label.setText(f"{name_bindings.get(owner, owner)}需收到：{owner_total} 元\n{user}需支付：{owner_total} 元")
         self.layout.addWidget(self.diff_label)
 
         btn_layout = QHBoxLayout()
