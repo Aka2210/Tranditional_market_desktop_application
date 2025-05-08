@@ -75,6 +75,12 @@ class RentSummaryInputDialog(QDialog):
         layout.addWidget(QLabel("月份："))
         layout.addWidget(self.month_input)
 
+        # 服務費用
+        self.service_fee_input = QLineEdit()
+        self.service_fee_input.setPlaceholderText("輸入服務費用")
+        layout.addWidget(QLabel("服務費用："))
+        layout.addWidget(self.service_fee_input)
+
         # 確定按鈕
         self.confirm_button = QPushButton("確定")
         self.confirm_button.clicked.connect(self.check_and_accept)
@@ -93,11 +99,17 @@ class RentSummaryInputDialog(QDialog):
             self.owner_input.currentText().strip(),
             self.user_input.currentText().strip(),
             self.year_input.currentText(),
-            self.month_input.currentText()
+            self.month_input.currentText(),
+            self.service_fee_input.text().strip()
         )
 
 class RentSummaryPreview(QDialog):
-    def __init__(self, owner: str, user: str, year: str, month: str, parent=None):
+    def __init__(self, owner: str, user: str, year: str, month: str, service_fee: str, parent=None):
+        # 新增服務費用處理
+        try:
+            self.service_fee = int(service_fee) if service_fee else 0
+        except ValueError:
+            self.service_fee = 0
         super().__init__(parent)
         main_path = os.path.join("resources", "jsonData", "mainData.json")
         fixed_path = os.path.join("resources", "jsonData", "fixedRentData.json")
@@ -227,10 +239,10 @@ class RentSummaryPreview(QDialog):
         self.diff_label = QLabel()
         self.diff_label.setAlignment(Qt.AlignRight)
         self.diff_label.setStyleSheet("font-size: 18px; padding: 12px;")
-        if user_total >= 0:
-            self.diff_label.setText(f"{user}需收到：{user_total} 元\n{owner}需支付：{user_total} 元")
-        elif owner_total >= 0:
-            self.diff_label.setText(f"{name_bindings.get(owner, owner)}需收到：{owner_total} 元\n{user}需支付：{owner_total} 元")
+        if user_total > 0:
+            self.diff_label.setText(f"{user}需額外支付服務費：{service_fee} 元\n因此{user}需收到：{user_total - int(service_fee)} 元, {owner}需支付：{user_total - int(service_fee)} 元")
+        elif owner_total > 0:
+            self.diff_label.setText(f"{user}需額外支付服務費：{service_fee} 元\n因此{name_bindings.get(owner, owner)}需收到：{owner_total + int(service_fee)} 元, {user}需支付：{owner_total + int(service_fee)} 元")
         self.layout.addWidget(self.diff_label)
 
         btn_layout = QHBoxLayout()

@@ -49,8 +49,8 @@ class MainWindow(QMainWindow):
         exportToJsonDict(self, self.current_date)
         dialog = RentSummaryInputDialog()
         if dialog.exec():
-            owner, user, year, month = dialog.get_inputs()
-            preview = RentSummaryPreview(owner=owner, user=user, year=year, month=month)
+            owner, user, year, month, service_fee = dialog.get_inputs()
+            preview = RentSummaryPreview(owner=owner, user=user, year=year, month=month, service_fee=service_fee)
             preview.exec()
 
     def openFixedRentEditor(self):
